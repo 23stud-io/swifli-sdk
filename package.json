@@ -1,0 +1,16 @@
+{
+  "name": "swifli-sdk",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "tsc && node dist/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "SDK for handling blockchain action links",
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  }
+}
