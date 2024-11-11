@@ -11,6 +11,14 @@
   "license": "ISC",
   "description": "SDK for handling blockchain action links",
   "devDependencies": {
+    "microbundle": "^0.15.1",
     "typescript": "^5.6.3"
-  }
+  },
+  "exports": {
+    "require": "./dist/index.js",
+    "default": "./dist/index.modern.js"
+},
+"files": [
+    "dist"
+  ]
 }
