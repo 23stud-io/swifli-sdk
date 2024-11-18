@@ -43,3 +43,13 @@ export interface ILogger {
   warn(...args: any[]): void;
   info(...args: any[]): void;
 }
+
+export interface SwifliMetadata {
+  contract: string;
+  name: string;
+  description: string;
+  image: string;
+  website: string;
+  network: string;
+  abi: any[];
+}

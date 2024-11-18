@@ -1,10 +1,11 @@
 import { EventEmitter } from '../utils/events';
-import { SwifliConfig, SwifliEventMap, TweetMatch, ILogger } from './types';
+import { SwifliConfig, SwifliEventMap, TweetMatch, ILogger, SwifliMetadata } from './types';
 import { DomainRegistry } from './registry';
 import { TwitterParser } from './parser';
 import { TwitterObserver } from './observer';
 import { Logger } from '../utils/logger';
 import { createHttpClient } from '../utils/http';
+import { MetadataService } from './metadata';
 
 export class SwifliTwitterSDK extends EventEmitter {
   private static instance: SwifliTwitterSDK;
@@ -15,6 +16,7 @@ export class SwifliTwitterSDK extends EventEmitter {
   private readonly registry: DomainRegistry;
   private readonly parser: TwitterParser;
   private readonly observer: TwitterObserver;
+  private readonly metadataService: MetadataService;
 
   private readonly DEFAULT_CONFIG: Required<SwifliConfig> = {
     registryUrl: 'https://raw.githubusercontent.com/23stud-io/swifli-registry/refs/heads/main/trusted_domains.json',
@@ -28,7 +30,7 @@ export class SwifliTwitterSDK extends EventEmitter {
     super();
     this.config = { ...this.DEFAULT_CONFIG, ...config };
     this.domains = [...this.config.defaultDomains];
-    
+
     // Initialize components
     this.logger = new Logger(this.config.debug);
     const httpClient = createHttpClient(this.logger, {
@@ -36,6 +38,7 @@ export class SwifliTwitterSDK extends EventEmitter {
       delay: this.config.retryDelay
     });
 
+    this.metadataService = new MetadataService(httpClient, this.logger);
     this.registry = new DomainRegistry(
       this.config.registryUrl,
       this.config.defaultDomains,
@@ -54,6 +57,12 @@ export class SwifliTwitterSDK extends EventEmitter {
       SwifliTwitterSDK.instance = new SwifliTwitterSDK(config);
     }
     return SwifliTwitterSDK.instance;
+  }
+
+  async getMetadataForUrl(url: string): Promise<SwifliMetadata | null> {
+    const id = this.metadataService.extractIdFromUrl(url);
+    if (!id) return null;
+    return this.metadataService.getMetadataById(id);
   }
 
   private processTweet = (tweetElement: Element): void => {
