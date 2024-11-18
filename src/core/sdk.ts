@@ -17,6 +17,9 @@ export class SwifliTwitterSDK extends EventEmitter {
   private readonly parser: TwitterParser;
   private readonly observer: TwitterObserver;
   private readonly metadataService: MetadataService;
+  private processedTweets = new WeakSet<Element>();
+  private processingQueue = new Set<string>();
+  private isProcessing = false;
 
   private readonly DEFAULT_CONFIG: Required<SwifliConfig> = {
     registryUrl: 'https://raw.githubusercontent.com/23stud-io/swifli-registry/refs/heads/main/trusted_domains.json',
@@ -48,7 +51,7 @@ export class SwifliTwitterSDK extends EventEmitter {
     this.parser = new TwitterParser(this.logger);
     this.observer = new TwitterObserver(
       this.logger,
-      this.processTweet.bind(this)
+      this.queueTweetProcessing.bind(this)
     );
   }
 
@@ -57,6 +60,75 @@ export class SwifliTwitterSDK extends EventEmitter {
       SwifliTwitterSDK.instance = new SwifliTwitterSDK(config);
     }
     return SwifliTwitterSDK.instance;
+  }
+
+  private getTweetId(element: Element): string {
+    const article = element.closest('article');
+    const text = element.textContent || '';
+    const timestamp = article?.querySelector('time')?.getAttribute('datetime') || Date.now().toString();
+    return `${text}-${timestamp}`;
+  }
+
+  private queueTweetProcessing(tweetElement: Element): void {
+    const tweetId = this.getTweetId(tweetElement);
+    
+    if (this.processingQueue.has(tweetId) || this.processedTweets.has(tweetElement)) {
+      this.logger.log('Tweet already queued or processed:', tweetId);
+      return;
+    }
+
+    this.processingQueue.add(tweetId);
+    this.scheduleProcessing();
+  }
+
+  private scheduleProcessing(): void {
+    if (this.isProcessing) return;
+    
+    requestAnimationFrame(() => {
+      this.processQueue();
+    });
+  }
+
+  private async processQueue(): Promise<void> {
+    if (this.isProcessing) return;
+    
+    this.isProcessing = true;
+    
+    try {
+      const tweets = document.querySelectorAll('[data-testid="tweetText"]');
+      
+      for (const tweet of tweets) {
+        const tweetId = this.getTweetId(tweet);
+        
+        if (this.processedTweets.has(tweet)) {
+          this.processingQueue.delete(tweetId);
+          continue;
+        }
+
+        const { found, matchedDomain, url } = this.parser.findMatchingDomain(tweet, this.domains);
+        
+        if (found && matchedDomain) {
+          const match: TweetMatch = {
+            tweetElement: tweet,
+            matchedDomain,
+            tweetText: tweet.textContent,
+            timestamp: new Date().toISOString(),
+            url
+          };
+
+          this.processedTweets.add(tweet);
+          this.emit('tweet-found', match);
+        }
+
+        this.processingQueue.delete(tweetId);
+      }
+    } finally {
+      this.isProcessing = false;
+      
+      if (this.processingQueue.size > 0) {
+        this.scheduleProcessing();
+      }
+    }
   }
 
   async getMetadataForTweet(match: TweetMatch): Promise<SwifliMetadata | null> {
@@ -69,22 +141,6 @@ export class SwifliTwitterSDK extends EventEmitter {
     if (!id) return null;
     return this.metadataService.getMetadataById(id);
   }
-
-  private processTweet = (tweetElement: Element): void => {
-    const { found, matchedDomain, url } = this.parser.findMatchingDomain(tweetElement, this.domains);
-    
-    if (found && matchedDomain) {
-      const match: TweetMatch = {
-        tweetElement,
-        matchedDomain,
-        tweetText: tweetElement.textContent,
-        timestamp: new Date().toISOString(),
-        url
-      };
-
-      this.emit('tweet-found', match);
-    }
-  };
 
   private async updateDomains(): Promise<void> {
     try {
@@ -130,13 +186,13 @@ export class SwifliTwitterSDK extends EventEmitter {
     }
 
     this.observer.disconnect();
-    // this.removeAllListeners();
+    this.processedTweets = new WeakSet();
+    this.processingQueue.clear();
     this.isInitialized = false;
     this.logger.log('SDK destroyed');
     this.emit('destroyed');
   }
 
-  // Type-safe event emitter methods
   public on<K extends keyof SwifliEventMap>(event: K, listener: SwifliEventMap[K]): this {
     return super.on(event, listener);
   }
