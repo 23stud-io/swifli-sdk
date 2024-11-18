@@ -59,8 +59,13 @@ export class SwifliTwitterSDK extends EventEmitter {
     return SwifliTwitterSDK.instance;
   }
 
-  async getMetadataForUrl(url: string): Promise<SwifliMetadata | null> {
-    const id = this.metadataService.extractIdFromUrl(url);
+  async getMetadataForTweet(match: TweetMatch): Promise<SwifliMetadata | null> {
+    const tweetText = match.tweetText;
+    if (!tweetText) return null;
+
+    const id = this.metadataService.extractIdFromText(tweetText);
+    this.logger.log('Extracted ID from tweet text:', id);
+    
     if (!id) return null;
     return this.metadataService.getMetadataById(id);
   }

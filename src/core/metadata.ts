@@ -13,6 +13,29 @@ export class MetadataService {
       return `https://raw.githubusercontent.com/23stud-io/swifli-registry/refs/heads/main/${id}.json`;
     }
   
+    extractIdFromText(text: string): string | null {
+      // Match URLs in the text
+      const urlRegex = /(https?:\/\/[^\s]+)/g;
+      const matches = text.match(urlRegex);
+      
+      if (!matches) return null;
+  
+      for (const url of matches) {
+        try {
+          const parsedUrl = new URL(url);
+          // Get the last part of the path
+          const pathParts = parsedUrl.pathname.split('/').filter(Boolean);
+          if (pathParts.length > 0) {
+            return pathParts[pathParts.length - 1];
+          }
+        } catch (e) {
+          this.logger.error('Error parsing URL:', e);
+        }
+      }
+  
+      return null;
+    }
+  
     async getMetadataById(id: string): Promise<SwifliMetadata> {
       const url = this.getMetadataUrl(id);
       try {
@@ -24,9 +47,4 @@ export class MetadataService {
         throw error;
       }
     }
-  
-    extractIdFromUrl(url: string): string | null {
-      const match = url.match(/\/([^/]+)$/);
-      return match ? match[1] : null;
-    }
-}
+  }
