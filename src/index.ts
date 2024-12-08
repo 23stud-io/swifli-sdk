@@ -1,11 +1,11 @@
-import { SwifliTwitterSDK } from './core/sdk';
+import { SnappyTwitterSDK } from './core/sdk';
 
-import { SwifliConfig } from './core/types';
+import { SnappyConfig } from './core/types';
 export type { 
-  SwifliConfig, 
+  SnappyConfig, 
   TweetMatch, 
-  SwifliEventMap 
+  SnappyEventMap 
 } from './core/types';
 export { UIComponents } from './ui/components';
 
-export const getSwifliSDK = (config?: SwifliConfig) => SwifliTwitterSDK.getInstance(config);
+export const getSnappySDK = (config?: SnappyConfig) => SnappyTwitterSDK.getInstance(config);

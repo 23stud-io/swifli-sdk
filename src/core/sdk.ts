@@ -1,5 +1,5 @@
 import { EventEmitter } from '../utils/events';
-import { SwifliConfig, SwifliEventMap, TweetMatch, ILogger, SwifliMetadata } from './types';
+import { SnappyConfig, SnappyEventMap, TweetMatch, ILogger, SnappyMetadata } from './types';
 import { DomainRegistry } from './registry';
 import { TwitterParser } from './parser';
 import { TwitterObserver } from './observer';
@@ -7,10 +7,10 @@ import { Logger } from '../utils/logger';
 import { createHttpClient } from '../utils/http';
 import { MetadataService } from './metadata';
 
-export class SwifliTwitterSDK extends EventEmitter {
-  private static instance: SwifliTwitterSDK;
+export class SnappyTwitterSDK extends EventEmitter {
+  private static instance: SnappyTwitterSDK;
   private domains: string[];
-  private readonly config: Required<SwifliConfig>;
+  private readonly config: Required<SnappyConfig>;
   private isInitialized: boolean = false;
   private readonly logger: ILogger;
   private readonly registry: DomainRegistry;
@@ -21,15 +21,15 @@ export class SwifliTwitterSDK extends EventEmitter {
   private processingQueue = new Set<string>();
   private isProcessing = false;
 
-  private readonly DEFAULT_CONFIG: Required<SwifliConfig> = {
-    registryUrl: 'https://raw.githubusercontent.com/23stud-io/swifli-registry/refs/heads/main/trusted_domains.json',
-    defaultDomains: ['swifli-frontend.vercel.app'],
+  private readonly DEFAULT_CONFIG: Required<SnappyConfig> = {
+    registryUrl: 'https://raw.githubusercontent.com/23stud-io/Snappy-registry/refs/heads/main/trusted_domains.json',
+    defaultDomains: ['Snappy-frontend.vercel.app'],
     debug: false,
     retryAttempts: 3,
     retryDelay: 1000
   };
 
-  private constructor(config: SwifliConfig = {}) {
+  private constructor(config: SnappyConfig = {}) {
     super();
     this.config = { ...this.DEFAULT_CONFIG, ...config };
     this.domains = [...this.config.defaultDomains];
@@ -55,11 +55,11 @@ export class SwifliTwitterSDK extends EventEmitter {
     );
   }
 
-  public static getInstance(config?: SwifliConfig): SwifliTwitterSDK {
-    if (!SwifliTwitterSDK.instance) {
-      SwifliTwitterSDK.instance = new SwifliTwitterSDK(config);
+  public static getInstance(config?: SnappyConfig): SnappyTwitterSDK {
+    if (!SnappyTwitterSDK.instance) {
+      SnappyTwitterSDK.instance = new SnappyTwitterSDK(config);
     }
-    return SwifliTwitterSDK.instance;
+    return SnappyTwitterSDK.instance;
   }
 
   private getTweetId(element: Element): string {
@@ -131,7 +131,7 @@ export class SwifliTwitterSDK extends EventEmitter {
     }
   }
 
-  async getMetadataForTweet(match: TweetMatch): Promise<SwifliMetadata | null> {
+  async getMetadataForTweet(match: TweetMatch): Promise<SnappyMetadata | null> {
     const tweetText = match.tweetText;
     if (!tweetText) return null;
 
@@ -193,11 +193,11 @@ export class SwifliTwitterSDK extends EventEmitter {
     this.emit('destroyed');
   }
 
-  public on<K extends keyof SwifliEventMap>(event: K, listener: SwifliEventMap[K]): this {
+  public on<K extends keyof SnappyEventMap>(event: K, listener: SnappyEventMap[K]): this {
     return super.on(event, listener);
   }
 
-  public emit<K extends keyof SwifliEventMap>(event: K, ...args: Parameters<SwifliEventMap[K]>): boolean {
+  public emit<K extends keyof SnappyEventMap>(event: K, ...args: Parameters<SnappyEventMap[K]>): boolean {
     return super.emit(event, ...args);
   }
 }

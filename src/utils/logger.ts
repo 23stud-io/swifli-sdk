@@ -4,7 +4,7 @@ export class Logger implements ILogger {
   constructor(private readonly debug: boolean) {}
 
   private formatMessage(level: string, ...args: any[]): string {
-    return `[Swifli SDK ${level}] ${args.join(' ')}`;
+    return `[Snappy SDK ${level}] ${args.join(' ')}`;
   }
 
   log(...args: any[]): void {

@@ -1,6 +1,6 @@
 import { EventEmitter } from '../utils/events';
 
-export interface SwifliConfig {
+export interface SnappyConfig {
   registryUrl?: string;
   defaultDomains?: string[];
   debug?: boolean;
@@ -20,7 +20,7 @@ export interface TweetMatch {
   url?: string;
 }
 
-export type SwifliEventMap = {
+export type SnappyEventMap = {
   'domain-list-updated': (domains: string[]) => void;
   'tweet-found': (match: TweetMatch) => void;
   'error': (error: Error) => void;
@@ -44,7 +44,7 @@ export interface ILogger {
   info(...args: any[]): void;
 }
 
-export interface SwifliMetadata {
+export interface SnappyMetadata {
   contract: string;
   name: string;
   description: string;
