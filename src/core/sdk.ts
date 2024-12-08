@@ -142,6 +142,12 @@ export class SnappyTwitterSDK extends EventEmitter {
     return this.metadataService.getMetadataById(id);
   }
 
+  async getMetadataForUrl(url: string): Promise<SnappyMetadata | null> {
+    const id = this.metadataService.extractIdFromText(url);
+    if (!id) return null;
+    return this.metadataService.getMetadataById(id);
+  }
+
   private async updateDomains(): Promise<void> {
     try {
       const newDomains = await this.registry.fetchDomains();
