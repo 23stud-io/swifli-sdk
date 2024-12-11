@@ -23,7 +23,7 @@ export class SnappyTwitterSDK extends EventEmitter {
 
   private readonly DEFAULT_CONFIG: Required<SnappyConfig> = {
     registryUrl: 'https://raw.githubusercontent.com/23stud-io/Snappy-registry/refs/heads/main/trusted_domains.json',
-    defaultDomains: ['Snappy-frontend.vercel.app'],
+    defaultDomains: ['snappy.so'],
     debug: false,
     retryAttempts: 3,
     retryDelay: 1000

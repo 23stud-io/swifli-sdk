@@ -10,7 +10,7 @@ export class MetadataService {
     ) {}
   
     private getMetadataUrl(id: string): string {
-      return `https://raw.githubusercontent.com/23stud-io/snappy-registry/refs/heads/main/${id}.json`;
+      return `https://raw.githubusercontent.com/23stud-io/snappy-registry/refs/heads/main/metadata/${id}.json`;
     }
   
     extractIdFromText(text: string): string | null {
